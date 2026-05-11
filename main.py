@@ -1,12 +1,8 @@
 from dataHandler import dataHandler
+from compostionHandler import compositionHandler
 
-test = dataHandler()
-asd = test.getData()
-#print(asd)
-asd1 = test.getDataStats(asd)
-for i in asd1[0]:
-  print(i)
-#for z in asd1[1]:
-#    print(z)
-#for j in asd1[2]:
- #   print(j)
+dataClass = dataHandler()
+data = dataClass.getData()
+compHandler = compositionHandler()
+wComp = compHandler.weightedComposition(data)
+print(wComp)

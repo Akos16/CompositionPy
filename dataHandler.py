@@ -11,7 +11,7 @@ class dataHandler:
             filename = f"./Datas/component{i}.txt"
             df = pd.read_csv(filename, sep="\t", decimal=",")
             components.append(df)
-        return components
+        return components #composition[0]["18"][260] [0. txt]["lgE"][index, txt 1. sora a 0. elem]
     def getDataStats(self, components):
         componentsStatsMax = []
         componentsStatsMin = []
