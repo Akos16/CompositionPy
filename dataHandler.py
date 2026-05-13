@@ -3,12 +3,12 @@ import pandas as pd
 
 class dataHandler:
     def getData(self):
-        folder = "./Datas"
+        folder = "./MainDatas"
         files = [f for f in os.listdir(folder) if f.endswith(".txt")]
         n_files = len(files) - 1
         components = []
         for i in range(n_files):
-            filename = f"./Datas/component{i}.txt"
+            filename = f"./MainDatas/component{i}.txt"
             df = pd.read_csv(filename, sep="\t", decimal=",")
             components.append(df)
         return components #composition[0]["18"][260] [0. txt]["lgE"][index, txt 1. sora a 0. elem]
