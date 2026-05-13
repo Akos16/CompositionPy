@@ -21,5 +21,7 @@ class compositionHandler():
         for z in range(len(composition[3]["18"])):
             comp3.append(composition[3]["18"][z])
         '''
-        comp = (composition[0]["18"] * 0.70 + composition[1]["18"] * 0.10 + composition[2]["18"] * 0.10 + composition[3]["18"] * 0.10) / 4000
-        return comp
+        comp = (composition[0]["18"]/composition[0]["18"].sum() * 0.70 + composition[1]["18"]/composition[1]["18"].sum() * 0.10 + composition[2]["18"]/composition[2]["18"].sum() * 0.10 + composition[3]["18"]/composition[3]["18"].sum() * 0.10)
+
+        return comp, composition[0]["18"]
+    

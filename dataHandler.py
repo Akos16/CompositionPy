@@ -6,12 +6,28 @@ class dataHandler:
         folder = "./MainDatas"
         files = [f for f in os.listdir(folder) if f.endswith(".txt")]
         n_files = len(files) - 1
-        components = []
+        
+        #Xmax-ok
+        componentsX = []
+        filenameX = f"./MainDatas/component0.txt"
+        df = pd.read_csv(filenameX, sep="\t", decimal = ',')
+        componentsX = df["bin"]
+        
+        componentsY0 = []
+        componentsY1 = []
+        componentsY2 = []
+        componentsY3 = []
         for i in range(n_files):
-            filename = f"./MainDatas/component{i}.txt"
-            df = pd.read_csv(filename, sep="\t", decimal=",")
-            components.append(df)
-        return components #composition[0]["18"][260] [0. txt]["lgE"][index, txt 1. sora a 0. elem]
+            filename1 = f"./MainDatas/component{i}.txt"
+            df = pd.read_csv(filename1, sep="\t", decimal=",")
+            componentsY0 = pd.DataFrame({
+                'Xmax': componentsX.values,
+                'Frec': df["18"].values
+            })
+        
+        return componentsY0, componentsY1, componentsY2, componentsY3, componentsX
+    
+    
     def getDataStats(self, components):
         componentsStatsMax = []
         componentsStatsMin = []
