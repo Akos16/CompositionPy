@@ -11,8 +11,8 @@ class dataHandler:
         componentsX = []
         filenameX = f"./MainDatas/component0.txt"
         df = pd.read_csv(filenameX, sep="\t", decimal = ',')
-        componentsX = df["bin"]
         
+        componentsX = df["bin"]
         componentsY0 = []
         componentsY1 = []
         componentsY2 = []
@@ -20,13 +20,17 @@ class dataHandler:
         for i in range(n_files):
             filename1 = f"./MainDatas/component{i}.txt"
             df = pd.read_csv(filename1, sep="\t", decimal=",")
-            componentsY0 = pd.DataFrame({
-                'Xmax': componentsX.values,
-                'Frec': df["18"].values
-            })
+            match i: 
+                case 0: 
+                    componentsY0 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
+                case 1: 
+                    componentsY1 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
+                case 2: 
+                    componentsY2 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
+                case 3: 
+                    componentsY3 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
         
         return componentsY0, componentsY1, componentsY2, componentsY3, componentsX
-    
     
     def getDataStats(self, components):
         componentsStatsMax = []

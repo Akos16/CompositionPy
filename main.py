@@ -13,3 +13,9 @@ print(data[0])
 data[0].to_csv("./Datas/comp0.csv", index=False)
 # Sample DataFrame 501, 0-tól
 
+plt.plot(data[0]['Xmax'], data[0]['Frec'])
+plt.xticks(data[0]['Xmax'])
+plt.xlabel('Xmax')
+plt.ylabel('Frec')
+plt.savefig('./Datas/comp0.png')
+plt.show()
