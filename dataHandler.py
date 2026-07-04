@@ -7,6 +7,7 @@ class dataHandler:
         files = [f for f in os.listdir(folder) if f.endswith(".txt")]
         n_files = len(files) - 1
         
+        lgEs = ["17,5", "18", "18,5", "19"]
         #Xmax-ok
         componentsX = []
         filenameX = f"./MainDatas/component0.txt"
@@ -22,13 +23,17 @@ class dataHandler:
             df = pd.read_csv(filename1, sep="\t", decimal=",")
             match i: 
                 case 0: 
-                    componentsY0 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
+                    for y in lgEs:
+                        componentsY0.append(pd.DataFrame({'Xmax': componentsX.values, 'Frac': df[y].values / df[y].values.sum()}))
                 case 1: 
-                    componentsY1 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
+                    for y in lgEs:
+                        componentsY1.append(pd.DataFrame({'Xmax': componentsX.values, 'Frac': df[y].values / df[y].values.sum()}))
                 case 2: 
-                    componentsY2 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
+                    for y in lgEs:
+                        componentsY2.append(pd.DataFrame({'Xmax': componentsX.values, 'Frac': df[y].values / df[y].values.sum()}))
                 case 3: 
-                    componentsY3 = pd.DataFrame({'Xmax': componentsX.values, 'Frec': df["18"].values / df["18"].values.sum()})
+                    for y in lgEs:
+                        componentsY3.append(pd.DataFrame({'Xmax': componentsX.values, 'Frac': df[y].values / df[y].values.sum()}))
         
         return componentsY0, componentsY1, componentsY2, componentsY3, componentsX
     

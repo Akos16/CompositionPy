@@ -2,8 +2,7 @@
 #0 <= a, b, c, d <= 1  ugy hogy a+b+c+d=1
 #composition[0]["18"][260] [0. txt]["lgE"][index, txt 1. sora a 0. elem]
 class compositionHandler():
-    def weightedComposition(self, composition):
-        comp = (composition[0]["18"]/composition[0]["18"].sum() * 0.70 + composition[1]["18"]/composition[1]["18"].sum() * 0.10 + composition[2]["18"]/composition[2]["18"].sum() * 0.10 + composition[3]["18"]/composition[3]["18"].sum() * 0.10)
-
-        return comp, composition[0]["18"]
+    def weightedComposition(self, comp0, comp1, comp2, comp3):
+        comp = comp0 * 1 + comp1 * 0 + comp2 * 0 + comp3 * 0
+        return comp
     

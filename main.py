@@ -3,19 +3,26 @@ from compostionHandler import compositionHandler
 import matplotlib.pyplot as plt
 import pandas as pd
 dataClass = dataHandler()
-data = dataClass.getData()
-#compHandler = compositionHandler()
-#wComp = compHandler.weightedComposition(data)
-#print(data)
-#df = pd.DataFrame(wComp)
-#df.to_csv("./Datas/out.csv")
-print(data[0])
-data[0].to_csv("./Datas/comp0.csv", index=False)
-# Sample DataFrame 501, 0-tól
+compHandler = compositionHandler()
 
-plt.plot(data[0]['Xmax'], data[0]['Frec'])
+data = dataClass.getData()
+wComp = compHandler.weightedComposition(data[0].Frac, data[1].Frac, data[2].Frac, data[3].Frac)
+print(wComp)
+
+#data[0].to_csv("./Datas/comp0.csv", index=False)
+
+
+plt.plot(data[0]['Xmax'], data[0]['Frac'])
 plt.xticks(data[0]['Xmax'])
 plt.xlabel('Xmax')
-plt.ylabel('Frec')
+plt.ylabel('Frac')
 plt.savefig('./Datas/comp0.png')
+
+plt.plot(data[0]['Xmax'], wComp)
+plt.xticks(data[0]['Xmax'])
+plt.xlabel('Xmax')
+plt.ylabel('Frac')
+plt.savefig('./Datas/wComp.png')
+plt.show()
+
 plt.show()
