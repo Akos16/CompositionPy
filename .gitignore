@@ -1,3 +1,4 @@
-Datas/
+outputDatas/
 __pycache__/
-MainDatas/
+MonteCarloSimulations/
+xMaxData/
