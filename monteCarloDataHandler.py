@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 class monteCarloDataHandler:
-    def getData(self):
+    def getMonteCarloData(self):
         folder = "./MonteCarloSimulations"
         files = [f for f in os.listdir(folder) if f.endswith(".txt")]
         n_files = len(files) - 1
