@@ -15,9 +15,9 @@ class xMaxDataHandler:
             df = pd.read_csv(filename, sep="\t", decimal=",")
             match i: 
                 case 0: 
-                        file0 = df["Xmax"].to_numpy(), df["Counts"].to_numpy(), df["CountsSqrt"].to_numpy()
+                        file0 = df["Xmax"].to_numpy(), df["Counts"].to_numpy() / df["Counts"].to_numpy().sum(), df["CountsSqrt"].to_numpy()
                 case 1: 
-                        file1 = df["Xmax"].to_numpy(), df["Counts"].to_numpy(), df["CountsSqrt"].to_numpy()
+                        file1 = df["Xmax"].to_numpy(), df["Counts"].to_numpy() / df["Counts"].to_numpy().sum(), df["CountsSqrt"].to_numpy()
                 case 2: 
-                        file2 = df["Xmax"].to_numpy(), df["Counts"].to_numpy(), df["CountsSqrt"].to_numpy()
+                        file2 = df["Xmax"].to_numpy(), df["Counts"].to_numpy() / df["Counts"].to_numpy().sum(), df["CountsSqrt"].to_numpy()
         return file0, file1, file2

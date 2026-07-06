@@ -7,3 +7,4 @@ import pandas as pd
 monteCarloData = monteCarloDataHandler().getMonteCarloData()
 xMaxData = xMaxDataHandler().getXmaxData()
 
+print(xMaxData[0][1])
