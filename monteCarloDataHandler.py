@@ -5,7 +5,7 @@ class monteCarloDataHandler:
     def readAndRebin(self, filename, start=504, step=12):
         df = pd.read_csv(filename, sep="\t", decimal=",")
 
-        uj_sorok = []
+        new_lines = []
 
         i = 0
         while i < len(df):
@@ -13,19 +13,19 @@ class monteCarloDataHandler:
                 i += 1
                 continue
 
-            sor = {"bin": df.iloc[i, 0]}
+            line = {"bin": df.iloc[i, 0]}
 
             for col in df.columns[1:]:
                 osszeg = 0
                 for j in range(step):
                     if i + j < len(df):
                         osszeg += df.iloc[i + j][col]
-                sor[col] = osszeg
+                line[col] = osszeg
 
-            uj_sorok.append(sor)
+            new_lines.append(line)
             i += step
 
-        return pd.DataFrame(uj_sorok)         
+        return pd.DataFrame(new_lines)         
 
     def getMonteCarloData(self):
         folder = "./MonteCarloSimulations"
