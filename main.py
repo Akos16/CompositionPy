@@ -10,6 +10,22 @@ import numpy as np
 monteCarloData = monteCarloDataHandler().getMonteCarloData()
 xMaxData = xMaxDataHandler().getXmaxData()
 
+
+
+def moments_from_prob(bin_centers, hist_counts):
+    bin_centers = np.asarray(bin_centers, dtype=float)
+    hist_counts = np.asarray(hist_counts, dtype=float)
+    P = hist_counts / hist_counts.sum()
+    mean = np.sum(bin_centers * P)
+    mu2 = np.sum(((bin_centers - mean) ** 2) * P)
+    skew = np.sum(((bin_centers - mean) ** 3) * P)
+    kurt = np.sum(((bin_centers - mean) ** 4) * P)
+    skewness = skew / mu2**1.5
+    excess_kurt = kurt / mu2**2 - 3
+    return mean, mu2, skewness, excess_kurt
+
+mean, var, skew, kurt = moments_from_prob(xMaxData[0][0], xMaxData[0][1])
+print(mean, var, skew, kurt)
 #first 50 element, xmax length = 50
 i = 0
 xAxis = []
