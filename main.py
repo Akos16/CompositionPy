@@ -10,8 +10,6 @@ import numpy as np
 monteCarloData = monteCarloDataHandler().getMonteCarloData()
 xMaxData = xMaxDataHandler().getXmaxData()
 
-
-
 def moments_from_prob(bin_centers, hist_counts):
     bin_centers = np.asarray(bin_centers, dtype=float)
     hist_counts = np.asarray(hist_counts, dtype=float)
@@ -55,8 +53,15 @@ def residual(pars, data=None):
     return model - data
 
 out = minimize(residual, params, kws={"data": data})
+testString = (
+    f"\nData points: {out.ndata}"
+    f"\nchi-square: {out.chisqr}"
+    f"\nredchi: {out.redchi}\n"
+)
 
-print(fit_report(out))
+with open("outputDatas/out.txt", "w") as f:
+    f.write(fit_report(out))
+    f.write(testString)
 
 
 a_fit = out.params["a"].value
