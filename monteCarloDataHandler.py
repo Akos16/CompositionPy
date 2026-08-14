@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-
+import numpy as np
 class monteCarloDataHandler:
     def readAndRebin(self, filename, start=504, step=12):
         df = pd.read_csv(filename, sep="\t", decimal=",")
@@ -62,15 +62,3 @@ class monteCarloDataHandler:
                         componentsY3.append(pd.DataFrame({'Xmax': componentsX.values, 'Frac': df[y].values / df[y].values.sum()}))
         
         return componentsY0, componentsY1, componentsY2, componentsY3, componentsX
-    
-    def getDataStats(self, components):
-        componentsStatsMax = []
-        componentsStatsMin = []
-        componentsStatsLength = []
-        lgEs = ["17,5", "18", "18,5", "19"]
-        for i in range(4):
-            for z in lgEs:
-                componentsStatsMax.append(components[i][z].max())
-                componentsStatsMin.append(components[i][z][components[i][z] > 0].min())
-                componentsStatsLength.append(len(components[i][z]))
-        return componentsStatsMax, componentsStatsMin, componentsStatsLength

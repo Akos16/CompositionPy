@@ -14,16 +14,26 @@ xMaxHandler = xMaxDataHandler()
 xMaxData = xMaxHandler.getXmaxData()
 
 #get momentums with erros from xMax data
-mean, mean_err, var, var_err, skew,  skew_err, kurt, kurt_err = xMaxHandler.moments_with_errors(xMaxData[0][0][:48], xMaxData[0][1][:48], xMaxData[0][2][:48])
+meandata, meandata_err, vardata, vardata_err, skewdata, skewdata_err, kurtdata, kurtdata_err = xMaxHandler.moments_with_errors(xMaxData[0][0][:48], xMaxData[0][1][:48], xMaxData[0][2][:48])
 
 arr1 = monteCarloData[0][1][:48]
 arr2 = monteCarloData[1][1][:48]
 arr3 = monteCarloData[2][1][:48]
 arr4 = monteCarloData[3][1][:48]
+arr5 = monteCarloData[4][:48]
+
+#mc skewness and kurt
+mcrows = [] #for 4 mc sim to calculate skewness
+for i in range(len(arr1)):
+    mcrows.append(arr1["Frac"][i] + arr2["Frac"][i] + arr3["Frac"][i] + arr4["Frac"][i])
+
+mcmean, mcmu2, mcskew, mc_excesskurt = xMaxHandler.moments_from_prob(xMaxData[0][0][:48], mcrows[:48])
+#print(f"xmax", mean, var, skew, kurt)
+#print(f"mc", mcmean, mcmu2, mcskew, mc_excesskurt)
 
 data = np.array(xMaxData[0][1][:48], dtype=float)
 params = create_params(a=0.68,b=0.11,c=0.17,d=0.04)
-
+print(data)
 def residual(pars):
     """Calculate chi-square between model and data."""
 
@@ -39,6 +49,10 @@ def residual(pars):
     for i in range(len(model)):
         if data[i] != 0:
             chi += ((data[i] - model[i])/np.sqrt(data[i])) ** 2 
+    chi += ((skewdata - mcskew) / skewdata_err) ** 2
+    chi += ((kurtdata - mc_excesskurt) / kurtdata_err) ** 2
+    #chi += (skewness_data - skewness_MC) / skewness_err
+	#chi += (kurtosis_data - kurtosis_MC) / kurtosis_err
 
     return chi
 
@@ -47,7 +61,27 @@ def residual(pars):
 params = np.array([0.4, 0.03, 0.41, 0.15])
 
 # Optimization
-out = optimize.minimize(residual, params, method="SLSQP")
+
+bounds = [ #https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.Bounds.html#scipy.optimize.Bounds
+    (0, 1),  # a
+    (0, 1),  # b
+    (0, 1),  # c
+    (0, 1)   # d
+]
+
+#?
+constraints = {
+    "type": "eq",
+    "fun": lambda x: np.sum(x) - 1
+}
+
+out = optimize.minimize(
+    residual,
+    params,
+    method="SLSQP",
+    bounds=bounds,
+    constraints=constraints
+)
 
 print("Success:", out.success)
 print("Message:", out.message)
