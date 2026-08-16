@@ -14,6 +14,8 @@ xMaxHandler = xMaxDataHandler()
 xMaxData = xMaxHandler.getXmaxData()
 
 xaxis =  monteCarloData[4][:48]
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 for i in range(1, len(monteCarloData) - 1):
 
     arr1 = monteCarloData[0][i][:48]
@@ -37,9 +39,9 @@ for i in range(1, len(monteCarloData) - 1):
 
         chi = 0.0
 
-        for i in range(len(model)):
-            if data[i] != 0:
-                chi += ((data[i] - model[i])/np.sqrt(data[i])) ** 2 
+        for j in range(len(model)):
+            if data[j] != 0:
+                chi += ((data[j] - model[j])/np.sqrt(data[j])) ** 2 
 
         return chi
 
@@ -75,16 +77,17 @@ for i in range(1, len(monteCarloData) - 1):
 
     print("chi2 =", out.fun)
 
-    a_fit = out.x[0]
-    b_fit = out.x[1]
-    c_fit = out.x[2]
-    d_fit = out.x[3]
+    a_fit, b_fit, c_fit, d_fit = out.x
     model_fit = (a_fit*arr1["Frac"][:48] + b_fit*arr2["Frac"][:48] + c_fit*arr3["Frac"][:48] + d_fit*arr4["Frac"][:48])
     #ax.errorbar(x, y, yerr=yerr, fmt='o', markersize=1, capsize=1, elinewidth=1, color='black', zorder=3, label='Mért adat')
     #plot xMax, lgE 18
-    plt.errorbar(monteCarloData[4][:48], xMaxData[i-1][1][:48], yerr=xMaxData[i-1][2][:48], fmt='o', markersize=1, capsize=1, elinewidth=1, color='black', zorder=3, label='Auger Xmax data')
-    plt.plot(monteCarloData[4][:48], model_fit, '-', markersize=2, color='skyblue', label='MC composition')
-    plt.xlabel("Xmax")
-    plt.title("MC composition on Xmax data")
-    plt.legend()
-    plt.show()
+    ax = axes[i-1]
+    ax.errorbar(monteCarloData[4][:48], xMaxData[i-1][1][:48], yerr=xMaxData[i-1][2][:48], fmt='o', markersize=1, capsize=1, elinewidth=1, color='black', zorder=3, label='Auger Xmax data')
+    ax.plot(monteCarloData[4][:48], model_fit, '-', markersize=2, color='skyblue', label='MC composition')
+    ax.set_xlabel("Xmax")
+    ax.set_ylabel("Counts")
+    ax.set_title(f"MC composition on Xmax data - plot {i}")
+    ax.legend()
+
+plt.tight_layout()
+plt.show()
