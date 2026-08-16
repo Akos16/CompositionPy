@@ -5,7 +5,7 @@ class xMaxDataHandler:
     def getXmaxData(self):
         folder = "./xMaxData"
         files = [f for f in os.listdir(folder) if f.endswith(".txt")]
-        n_files = len(files) - 1
+        n_files = len(files) 
 
         file0 = []
         file1 = []
