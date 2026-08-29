@@ -1,7 +1,2 @@
-outputDatas/
+
 __pycache__/
-MonteCarloSimulations/
-xMaxData/
-TestData/
-test.py
-test1.py

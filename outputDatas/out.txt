@@ -1,0 +1,18 @@
+[[Fit Statistics]]
+    # fitting method   = L-BFGS-B
+    # function evals   = 15
+    # data points      = 1
+    # variables        = 4
+    chi-square         = 6.1540e-34
+    reduced chi-square = 6.1540e-34
+    Akaike info crit   = -68.4707969
+    Bayesian info crit = -76.4707969
+##  Warning: uncertainties could not be estimated:
+[[Variables]]
+    a:  0.68061114 (init = 0.68)
+    b:  0.11061335 (init = 0.11)
+    c:  0.17061335 (init = 0.17)
+    d:  0.04061335 (init = 0.04)
+Data points: 1
+chi-square: 6.153963036015475e-34
+redchi: 6.153963036015475e-34
