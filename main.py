@@ -82,7 +82,7 @@ for idx in range(3):
     constr_skew = { "type": "eq", "fun": skew }
     constr_kurt = { "type": "eq", "fun": kurt }
     constr_unit = {"type":"eq", "fun": lambda x: np.sum(x) - 1}
-    constraints = [ constr_unit]
+    constraints = [constr_mean, constr_unit]
     out = optimize.minimize(
         residual,
         params,
