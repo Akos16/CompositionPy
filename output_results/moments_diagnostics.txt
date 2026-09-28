@@ -1,0 +1,3 @@
+--- Post-Fit Moments Diagnostics ---
+Adat Skewness: 0.7189 | Modell Skewness: 0.5807
+Adat Kurtosis: 1.1402 | Modell Kurtosis: 0.9947

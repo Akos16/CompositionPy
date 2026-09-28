@@ -110,7 +110,7 @@ for idx in range(3):
     model_fit = (a_fit*arr1["Frac"][:48] + b_fit*arr2["Frac"][:48] + c_fit*arr3["Frac"][:48] + d_fit*arr4["Frac"][:48])
     mcmeantest, mcmu2test, mcskewtest, mc_excesskurttest = xMaxHandler.moments_from_prob(xMaxData[xMax][0][:48], model_fit)
     print(f"Model skew: ", mcskewtest, "Auger skew: ", skewdata, "Auger skewerr: ", skewdata_err)
-    print(f"Model kurt: ", mc_excesskurttest, "Auger kurt: ", kurtdata, "Auger kurt: ", kurtdata_err)
+    print(f"Model kurt: ", mc_excesskurttest, "Auger kurt: ", kurtdata, "Auger kurterr: ", kurtdata_err)
     #ax.errorbar(x, y, yerr=yerr, fmt='o', markersize=1, capsize=1, elinewidth=1, color='black', zorder=3, label='Mért adat')
     #plot xMax, lgE 18
     l1 = ax.errorbar(monteCarloData[4][:48], xMaxData[xMax][1][:48], yerr=xMaxData[xMax][2][:48], fmt='o', markersize=1, capsize=1, elinewidth=1, color='black', zorder=3, label='Auger Xmax data')
