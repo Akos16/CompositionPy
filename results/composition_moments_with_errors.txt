@@ -1,0 +1,57 @@
+Xmax moments with bootstrap uncertainties
+Errors are 1-sigma bootstrap standard deviations.
+Kurtosis = excess kurtosis (kurtosis - 3).
+Sigma = sqrt(variance).
+Sigma error = standard deviation of sqrt(variance) over bootstrap toys.
+
+lgE = 18
+----------------------------------------------------------------------
+DATA
+mean              = 715.625282
+variance          = 3312.527758
+sigma             = 57.554563
+skewness          = 0.703371
+excess kurtosis   = 0.687275
+
+MODEL
+mean              = 715.503109 +/- 2.015946
+variance          = 3329.975595 +/- 232.128451
+sigma             = 57.705941 +/- 2.008850
+skewness          = 0.872687 +/- 0.128302
+excess kurtosis   = 1.465072 +/- 0.419528
+
+
+lgE = 18.5
+----------------------------------------------------------------------
+DATA
+mean              = 743.925926
+variance          = 3211.550069
+sigma             = 56.670540
+skewness          = 1.368960
+excess kurtosis   = 4.322109
+
+MODEL
+mean              = 743.743773 +/- 2.961606
+variance          = 3044.978586 +/- 299.736536
+sigma             = 55.181325 +/- 2.719291
+skewness          = 1.013364 +/- 0.161715
+excess kurtosis   = 1.942328 +/- 0.541491
+
+
+lgE = 19
+----------------------------------------------------------------------
+DATA
+mean              = 762.575342
+variance          = 2260.764871
+sigma             = 47.547501
+skewness          = 2.891807
+excess kurtosis   = 14.802842
+
+MODEL
+mean              = 760.665924 +/- 3.652190
+variance          = 1698.638912 +/- 324.256161
+sigma             = 41.214547 +/- 3.873927
+skewness          = 1.047389 +/- 0.317238
+excess kurtosis   = 3.232990 +/- 1.212128
+
+

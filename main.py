@@ -1,7 +1,6 @@
 
 from monteCarloDataHandler import monteCarloDataHandler
 from xMaxDataHandler import xMaxDataHandler
-from compostionHandler import compositionHandler
 from lmfit import create_params, fit_report, minimize
 from scipy.optimize import minimize
 import scipy.optimize as optimization
@@ -15,11 +14,7 @@ monteCarloData = monteCarloDataHandler().getMonteCarloData()
 xMaxHandler = xMaxDataHandler()
 xMaxData = xMaxHandler.getXmaxData()
 
-arrAugerComp = [
-    [0.40, 0.03, 0.41, 0.16],
-    [0.26, 0.21, 0.47, 0.06],
-    [0.14, 0.00, 0.84, 0.02]
-]
+arrAugerComp = [[0.40, 0.03, 0.41, 0.16],[0.26, 0.21, 0.47, 0.06],[0.14, 0.00, 0.84, 0.02]]
 
 #Bootstrap beállítások
 N_BOOTSTRAP = 1000
