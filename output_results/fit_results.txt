@@ -1,7 +1,0 @@
-Success: True
-Poisson deviance: 96.92070
-Fractions:
-f_H = 0.08867
-f_He = 0.35624
-f_N = 0.55510
-f_Fe = 0.00000
