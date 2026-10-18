@@ -88,9 +88,9 @@ plt.tick_params(axis="both",labelsize=14)
 plt.ylabel(r"$\langle X_{\max} \rangle$ [g/cm$^2$]",fontsize=16)
 plt.xlabel(r"$\log(E_{proton})$",fontsize=16)
 
-plt.legend(fontsize="large", loc="best")
+plt.legend(fontsize=18, loc="best")
 plt.tight_layout()
-plt.savefig(FIG_DIR / "mean_vs_lgE.png", dpi=300)
+plt.savefig(FIG_DIR / "mean_vs_lgE_all.png", dpi=300)
 plt.show()
 
 #var
@@ -105,15 +105,15 @@ plt.grid(True, linestyle="--", alpha=0.5)
 plt.tick_params(axis="both", labelsize=14)
 plt.ylabel(r"$\sigma$ [g/cm$^2$]", fontsize=16)
 plt.xlabel(r"$\log(E_{proton})$", fontsize=16)
-plt.legend(fontsize="large", loc="best")
+plt.legend(fontsize=18, loc="best")
 plt.tight_layout()
-plt.savefig(FIG_DIR / "sigma_vs_lgE.png", dpi=300)
+plt.savefig(FIG_DIR / "sigma_vs_lgE_all.png", dpi=300)
 plt.show()
 
 #skewness
 plt.figure(figsize=(8, 6))
 #szakdoga
-plt.errorbar(my_data["lgE"], my_data["skew"], yerr=my_data["skew_err"], fmt="s", markersize=6, elinewidth=2, capsize=3, label="Saját eredmény")
+plt.errorbar(my_data["lgE"], my_data["skew"], yerr=my_data["skew_err"], fmt="s", markersize=6, elinewidth=2, capsize=3, label="Adatokból számolt ferdeség")
 #Poisson
 plt.errorbar(poisson_data["lgE"], poisson_data["skew"], yerr=poisson_data["skew_err"], fmt="D", markersize=7, elinewidth=2, capsize=3, label="Poisson illesztés")
 #Chi^2
@@ -125,16 +125,16 @@ plt.grid(True, linestyle="--", alpha=0.5)
 plt.tick_params(axis="both", labelsize=14)
 plt.ylabel(r"$\gamma_1$", fontsize=16)
 plt.xlabel(r"$\log(E_{proton})$", fontsize=16)
-plt.legend(fontsize="large", loc="best")
+plt.legend(fontsize=18, loc="best")
 plt.tight_layout()
-plt.savefig(FIG_DIR / "skew_vs_lgE.png", dpi=300)
+plt.savefig(FIG_DIR / "skew_vs_lgE_all.png", dpi=300)
 plt.show()
 
 #kurtosis
 plt.figure(figsize=(8, 6))
 
 #szakdoga
-plt.errorbar(my_data["lgE"], my_data["kurt"], yerr=my_data["kurt_err"], fmt="s", markersize=6, elinewidth=2, capsize=3, label="Saját eredmény")
+plt.errorbar(my_data["lgE"], my_data["kurt"], yerr=my_data["kurt_err"], fmt="s", markersize=6, elinewidth=2, capsize=3, label="Adatokból számolt csúcsosság")
 #Poisson
 plt.errorbar(poisson_data["lgE"], poisson_data["kurt"], yerr=poisson_data["kurt_err"], fmt="D", markersize=7, elinewidth=2, capsize=3, label="Poisson illesztés")
 #Chi^2
@@ -146,9 +146,9 @@ plt.grid(True, linestyle="--", alpha=0.5)
 plt.tick_params(axis="both", labelsize=14)
 plt.ylabel(r"$\beta_2$", fontsize=16)
 plt.xlabel(r"$\log(E_{proton})$", fontsize=16)
-plt.legend(fontsize="large", loc="best")
+plt.legend(fontsize=18, loc="best")
 plt.tight_layout()
-plt.savefig(FIG_DIR / "kurt_vs_lgE.png", dpi=300)
+plt.savefig(FIG_DIR / "kurt_vs_lgE_all.png", dpi=300)
 plt.show()
 
 #chi^2
@@ -159,8 +159,8 @@ plt.grid(True, linestyle="--", alpha=0.5)
 plt.tick_params(axis="both", labelsize=14)
 plt.ylabel(r"$\chi^2$/ndf", fontsize=16)
 plt.xlabel(r"$\log(E_{proton})$", fontsize=16)
-plt.legend(fontsize="large", loc="best")
+plt.legend(fontsize=20, loc="best")
 plt.tight_layout()
-plt.savefig(FIG_DIR / "chi2_vs_lgE.png", dpi=300)
+plt.savefig(FIG_DIR / "chi2_vs_lgE_all.png", dpi=300)
 plt.show()
 

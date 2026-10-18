@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+from matplotlib.lines import Line2D
 from scipy.ndimage import gaussian_filter1d
 from monteCarloDataHandler import monteCarloDataHandler
 
@@ -15,26 +16,17 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 #lgE
 LGES = ["18", "18.5", "19"]
 
-# ============================================================================
 # EXPERIMENTAL ENERGY MAPPING
-# ============================================================================
-
 DATA_ENERGY_INDEX = {"18": 0, "18.5": 1, "19": 2}
 
-# ============================================================================
 # MC ENERGY MAPPING
-# ============================================================================
-
 MC_ENERGY_INDEX = {"18": 1, "18.5": 2, "19": 3}
 #componens nevek
 COMPONENT_NAMES = ["H", "He", "N", "Fe"]
 #504-es Xmax is kell
-EXCLUDED_XMAX = {504}
+EXCLUDED_XMAX = set()
 
-# ============================================================================
 # RESOLUTION
-# ============================================================================
-
 RESOLUTION_SIGMA = 20.0
 RESOLUTION_SIGMAS = [15.0, 20.0, 25.0]
 
@@ -60,18 +52,12 @@ def read_data_file(energy_bin):
 def load_mc_templates():
     return monteCarloDataHandler().getMonteCarloData()
 
-# ============================================================================
-# SELECT FIT RANGE
-# ============================================================================
-
+#fit range
 def select_fit_range(x, counts):
     mask = ~np.isin(x.astype(int), list(EXCLUDED_XMAX))
     return x[mask], counts[mask]
 
-# ============================================================================
 # ALIGN MC
-# ============================================================================
-
 def align_templates(x_data, mc, energy_index, sigma):
     mc_x = np.asarray(mc[4], dtype=float)
     template_matrix = []
@@ -84,18 +70,11 @@ def align_templates(x_data, mc, energy_index, sigma):
         frame_p = frame["Frac"].to_numpy(dtype=float)
         lookup = dict(zip(frame_x, frame_p))
         p = np.array([lookup.get(value, 0.0) for value in x_data], dtype=float)
-
-        # ---------------------------------------------------------------
         # Gaussian smearing
-        # ---------------------------------------------------------------
-
         if sigma > 0:
             p = gaussian_filter1d(p, sigma_bins, mode="constant", cval=0.0)
-
-        # ---------------------------------------------------------------
+        
         # Normalize MC template
-        # ---------------------------------------------------------------
-
         total = p.sum()
 
         if total <= 0:
@@ -106,18 +85,12 @@ def align_templates(x_data, mc, energy_index, sigma):
 
     return np.asarray(template_matrix)
 
-# ============================================================================
 # EXPECTED COUNTS
-# ============================================================================
-
 def poisson_expected(counts, templates, fractions):
     probability = fractions @ templates
     return counts.sum() * probability
 
-# ============================================================================
 # POISSON DEVIANCE
-# ============================================================================
-
 def poisson_deviance(fractions, counts, templates):
     if np.any(fractions < 0):
         return np.inf
@@ -138,10 +111,7 @@ def poisson_deviance(fractions, counts, templates):
 
     return float(deviance)
 
-# ============================================================================
-# FIT
-# ============================================================================
-
+#fit
 def fit_poisson(counts, templates):
     bounds = [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)]
 
@@ -157,10 +127,7 @@ def fit_poisson(counts, templates):
 
     return result
 
-# ============================================================================
-# MOMENTS
-# ============================================================================
-
+#momentumok
 def moments_from_counts(x, counts):
     total = counts.sum()
 
@@ -182,10 +149,7 @@ def moments_from_counts(x, counts):
 
     return mean, variance, skewness, excess_kurtosis
 
-# ============================================================================
 # DEVIANCE RESIDUALS
-# ============================================================================
-
 def poisson_deviance_residuals(counts, expected):
     residuals = np.zeros_like(counts, dtype=float)
     positive = counts > 0
@@ -197,10 +161,7 @@ def poisson_deviance_residuals(counts, expected):
 
     return residuals
 
-# ============================================================================
 # BOOTSTRAP
-# ============================================================================
-
 def bootstrap_fit(x, counts, templates):
     rng = np.random.default_rng(BOOTSTRAP_SEED)
 
@@ -208,16 +169,10 @@ def bootstrap_fit(x, counts, templates):
     moments_list = []
     sigma_list = []
 
-    # ------------------------------------------------------------------------
     # Bootstrap loop
-    # ------------------------------------------------------------------------
-
     for _ in range(N_BOOTSTRAP):
 
-        # ---------------------------------------------------------------
         # Generate Poisson toy data
-        # ---------------------------------------------------------------
-
         toy_counts = rng.poisson(counts)
 
         try:
@@ -225,22 +180,13 @@ def bootstrap_fit(x, counts, templates):
         except RuntimeError:
             continue
 
-        # ---------------------------------------------------------------
         # Best-fit fractions
-        # ---------------------------------------------------------------
-
         fractions = result.x
 
-        # ---------------------------------------------------------------
         # Expected counts for toy fit
-        # ---------------------------------------------------------------
-
         expected = poisson_expected(toy_counts, templates, fractions)
 
-        # ---------------------------------------------------------------
         # Moments of fitted model
-        # ---------------------------------------------------------------
-
         moments = moments_from_counts(x, expected)
         variance = moments[1]
 
@@ -253,10 +199,7 @@ def bootstrap_fit(x, counts, templates):
         moments_list.append(moments)
         sigma_list.append(sigma)
 
-    # ------------------------------------------------------------------------
     # Convert to arrays
-    # ------------------------------------------------------------------------
-
     fractions_array = np.asarray(fractions_list)
     moments_array = np.asarray(moments_list)
     sigma_array = np.asarray(sigma_list)
@@ -264,104 +207,55 @@ def bootstrap_fit(x, counts, templates):
     if len(fractions_array) < 2:
         raise RuntimeError("Bootstrap failed.")
 
-    # ------------------------------------------------------------------------
-    # Fraction errors
-    # ------------------------------------------------------------------------
-
+    #fractions error
     fraction_errors = fractions_array.std(axis=0, ddof=1)
 
-    # ------------------------------------------------------------------------
-    # Moment errors
-    #
-    # 0 = mean
-    # 1 = variance
-    # 2 = skewness
-    # 3 = excess kurtosis
-    # ------------------------------------------------------------------------
-
+    
+    #moments errors, mena, var, skew, kurt
     moment_errors = moments_array.std(axis=0, ddof=1)
 
-    # ------------------------------------------------------------------------
-    # Sigma error
-    # ------------------------------------------------------------------------
-
+    #sigma err
     sigma_error = sigma_array.std(ddof=1)
 
     return fraction_errors, moment_errors, sigma_error, sigma_array
 
-# ============================================================================
 # ANALYSE ONE ENERGY
-# ============================================================================
-
 def analyse_energy(lgE, mc, sigma, do_bootstrap=False):
 
-    # ------------------------------------------------------------------------
     # Experimental file index
-    # ------------------------------------------------------------------------
-
     data_index = DATA_ENERGY_INDEX[lgE]
 
-    # ------------------------------------------------------------------------
     # MC energy index
-    # ------------------------------------------------------------------------
-
     mc_index = MC_ENERGY_INDEX[lgE]
 
-    # ------------------------------------------------------------------------
     # Data
-    # ------------------------------------------------------------------------
-
     x_raw, counts_raw = read_data_file(data_index)
     x, counts = select_fit_range(x_raw, counts_raw)
 
-    # ------------------------------------------------------------------------
     # MC templates
-    # ------------------------------------------------------------------------
-
     templates = align_templates(x, mc, mc_index, sigma)
 
-    # ------------------------------------------------------------------------
     # Fit
-    # ------------------------------------------------------------------------
-
     result = fit_poisson(counts, templates)
     fractions = result.x
     expected = poisson_expected(counts, templates, fractions)
 
-    # ------------------------------------------------------------------------
     # Residuals
-    # ------------------------------------------------------------------------
-
     residuals = poisson_deviance_residuals(counts, expected)
 
-    # ------------------------------------------------------------------------
     # Data moments
-    # ------------------------------------------------------------------------
-
     data_moments = moments_from_counts(x, counts)
 
-    # ------------------------------------------------------------------------
     # Model moments
-    # ------------------------------------------------------------------------
-
     model_moments = moments_from_counts(x, expected)
 
-    # ------------------------------------------------------------------------
     # Data sigma
-    # ------------------------------------------------------------------------
-
     data_sigma = np.sqrt(data_moments[1])
 
-    # ------------------------------------------------------------------------
     # Model sigma
-    # ------------------------------------------------------------------------
-
     model_sigma = np.sqrt(model_moments[1])
 
-    # ------------------------------------------------------------------------
     # Bootstrap
-    # ------------------------------------------------------------------------
-
     if do_bootstrap:
         fraction_errors, moment_errors, sigma_error, sigma_samples = bootstrap_fit(x, counts, templates)
     else:
@@ -370,10 +264,7 @@ def analyse_energy(lgE, mc, sigma, do_bootstrap=False):
         sigma_error = np.nan
         sigma_samples = np.array([])
 
-    # ------------------------------------------------------------------------
     # Return all information
-    # ------------------------------------------------------------------------
-
     return {
         "lgE": lgE,
         "sigma": sigma,
@@ -394,26 +285,17 @@ def analyse_energy(lgE, mc, sigma, do_bootstrap=False):
         "model_moment_errors": moment_errors,
     }
 
-# ============================================================================
 # MAIN
-# ============================================================================
-
 def main():
 
     print("=" * 80)
     print("FAST POISSON COMPOSITION FIT")
     print("=" * 80)
-
-    # ------------------------------------------------------------------------
-    # Load MC once
-    # ------------------------------------------------------------------------
-
+    
+    #mc beolvasás
     mc = load_mc_templates()
 
-    # ------------------------------------------------------------------------
     # Nominal fits
-    # ------------------------------------------------------------------------
-
     nominal_results = []
 
     for lgE in LGES:
@@ -440,10 +322,7 @@ def main():
         print("  data excess kurtosis:", f"{result['data_moments'][3]:.6f}")
         print("  model excess kurtosis:", f"{result['model_moments'][3]:.6f}", "+/-", f"{result['model_moment_errors'][3]:.6f}" if DO_BOOTSTRAP else "nan")
 
-    # =========================================================================
-    # RESOLUTION SCAN
-    # =========================================================================
-
+    #resulotion scan
     scan_rows = []
 
     for resolution_sigma in RESOLUTION_SIGMAS:
@@ -454,17 +333,11 @@ def main():
 
             row = {"lgE": lgE, "resolution_sigma": resolution_sigma, "deviance": result["deviance"]}
 
-            # ---------------------------------------------------------------
-            # Composition fractions
-            # ---------------------------------------------------------------
-
+            #comp fractions
             for name, fraction in zip(COMPONENT_NAMES, result["fractions"]):
                 row[f"f_{name}"] = fraction
 
-            # ---------------------------------------------------------------
-            # Moments
-            # ---------------------------------------------------------------
-
+            #moments
             data_m = result["data_moments"]
             model_m = result["model_moments"]
 
@@ -484,10 +357,7 @@ def main():
     scan_df = pd.DataFrame(scan_rows)
     scan_df.to_csv(RESULTS_DIR / "composition_resolution_scan.csv", index=False)
 
-    # =========================================================================
     # NOMINAL RESULTS CSV
-    # =========================================================================
-
     result_rows = []
 
     for result in nominal_results:
@@ -499,18 +369,12 @@ def main():
             "residual_rms": np.sqrt(np.mean(result["residuals"]**2)),
         }
 
-        # ---------------------------------------------------------------
         # Composition fractions
-        # ---------------------------------------------------------------
-
         for name, fraction, error in zip(COMPONENT_NAMES, result["fractions"], result["fraction_errors"]):
             row[f"f_{name}"] = fraction
             row[f"err_f_{name}"] = error
 
-        # ---------------------------------------------------------------
         # Moments
-        # ---------------------------------------------------------------
-
         data_m = result["data_moments"]
         model_m = result["model_moments"]
 
@@ -526,10 +390,7 @@ def main():
         row["data_excess_kurtosis"] = data_m[3]
         row["model_excess_kurtosis"] = model_m[3]
 
-        # ---------------------------------------------------------------
         # Bootstrap errors
-        # ---------------------------------------------------------------
-
         moment_errors = result["model_moment_errors"]
 
         row["err_model_mean"] = moment_errors[0]
@@ -542,10 +403,7 @@ def main():
     result_df = pd.DataFrame(result_rows)
     result_df.to_csv(RESULTS_DIR / "composition_poisson_results.csv", index=False)
 
-    # =========================================================================
     # SIGMA BOOTSTRAP DISTRIBUTIONS
-    # =========================================================================
-
     sigma_bootstrap_rows = []
 
     for result in nominal_results:
@@ -555,10 +413,7 @@ def main():
     sigma_bootstrap_df = pd.DataFrame(sigma_bootstrap_rows)
     sigma_bootstrap_df.to_csv(RESULTS_DIR / "sigma_bootstrap_samples.csv", index=False)
 
-    # =========================================================================
     # MOMENTS WITH ERRORS -> TXT
-    # =========================================================================
-
     moments_txt = RESULTS_DIR / "composition_moments_with_errors.txt"
 
     with open(moments_txt, "w", encoding="utf-8") as f:
@@ -580,10 +435,7 @@ def main():
             f.write(f"lgE = {lgE}\n")
             f.write("-" * 70 + "\n")
 
-            # ---------------------------------------------------------------
             # DATA
-            # ---------------------------------------------------------------
-
             f.write("DATA\n")
             f.write(f"mean              = {data_m[0]:.6f}\n")
             f.write(f"variance          = {data_m[1]:.6f}\n")
@@ -592,10 +444,7 @@ def main():
             f.write(f"excess kurtosis   = {data_m[3]:.6f}\n")
             f.write("\n")
 
-            # ---------------------------------------------------------------
             # MODEL
-            # ---------------------------------------------------------------
-
             f.write("MODEL\n")
             f.write(f"mean              = {model_m[0]:.6f} +/- {moment_errors[0]:.6f}\n")
             f.write(f"variance          = {model_m[1]:.6f} +/- {moment_errors[1]:.6f}\n")
@@ -604,10 +453,7 @@ def main():
             f.write(f"excess kurtosis   = {model_m[3]:.6f} +/- {moment_errors[3]:.6f}\n")
             f.write("\n\n")
 
-    # =========================================================================
     # PRINT FINAL RESULTS
-    # =========================================================================
-
     print()
     print("=" * 80)
     print("NOMINAL RESULTS")
@@ -615,113 +461,118 @@ def main():
 
     print(result_df.to_string(index=False, float_format=lambda x: f"{x:.6f}"))
 
-    # =========================================================================
-    # PLOT 1 - DATA VS POISSON MODEL
-    # =========================================================================
+    # PLOT 1 - ADATOK ÉS POISSON-ILLESZTÉS
+    # A három panel azonos x- és y-tengelyt használ.
+    plt.rcParams.update({"font.size": 15, "axes.labelsize": 17,
+                         "xtick.labelsize": 13, "ytick.labelsize": 13,
+                         "legend.fontsize": 12})
+    common_xmin = min(np.min(r["x"]) for r in nominal_results)
+    common_xmax = max(np.max(r["x"]) for r in nominal_results)
 
-    fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharex=True, sharey=True)
+    fig.patch.set_facecolor("white")
 
     for index, result in enumerate(nominal_results):
-
         ax = axes[index]
         x = result["x"]
         counts = result["counts"]
         expected = result["expected"]
 
-        # --------------------------------------------------------------------
-        # DATA
-        # --------------------------------------------------------------------
-
+        # Mért adatok: fekete; illesztés: piros.
         data_probability = counts / counts.sum()
         data_error = np.sqrt(counts) / counts.sum()
-
-        ax.errorbar(x, data_probability, yerr=data_error, fmt="o", markersize=3, capsize=2, label="Data")
-
-        # --------------------------------------------------------------------
-        # MODEL
-        # --------------------------------------------------------------------
-
+        ax.errorbar(x, data_probability, yerr=data_error, fmt="o",
+                    color="black", ecolor="black", markersize=4,
+                    capsize=2)
         model_probability = expected / expected.sum()
-        ax.plot(x, model_probability, "-", linewidth=2, label="Poisson MC mixture")
+        ax.plot(x, model_probability, "-", color="red", linewidth=2.5,
+                label="Poisson-fit")
 
-        # --------------------------------------------------------------------
-        # COMPOSITION
-        # --------------------------------------------------------------------
-
-        f = result["fractions"]
-        e = result["fraction_errors"]
-
-        if DO_BOOTSTRAP:
-            composition_text = "\n".join([f"$f_{{{name}}}$ = {fraction:.3f} $\\pm$ {error:.3f}" for name, fraction, error in zip(COMPONENT_NAMES, f, e)])
-        else:
-            composition_text = "\n".join([f"$f_{{{name}}}$ = {fraction:.3f}" for name, fraction in zip(COMPONENT_NAMES, f)])
-
-        ax.text(0.03, 0.96, composition_text, transform=ax.transAxes, va="top", fontsize=10)
-
-        # --------------------------------------------------------------------
-        # MOMENTS
-        # --------------------------------------------------------------------
-
-        data_m = result["data_moments"]
-        model_m = result["model_moments"]
-        moment_errors = result["model_moment_errors"]
-
-        moment_text = (
-            f"mean: {data_m[0]:.1f} / {model_m[0]:.1f} $\\pm$ {moment_errors[0]:.1f}\n"
-            f"$\\sigma$: {result['data_sigma']:.1f} / {result['model_sigma']:.1f} $\\pm$ {result['model_sigma_error']:.1f}\n"
-            f"variance: {data_m[1]:.1f} / {model_m[1]:.1f} $\\pm$ {moment_errors[1]:.1f}\n"
-            f"skewness: {data_m[2]:.3f} / {model_m[2]:.3f} $\\pm$ {moment_errors[2]:.3f}\n"
-            f"excess kurtosis: {data_m[3]:.3f} / {model_m[3]:.3f} $\\pm$ {moment_errors[3]:.3f}"
+        # Áttekinthető, valódi jelmagyarázat jobb felül, panelenként.
+        ndf = len(counts) - 3  # négy arányból három független
+        diagnostic = [
+            Line2D([], [], color="none", label=f"Deviancia: {result['deviance']:.1f}"),
+            Line2D([], [], color="none", label=f"NDF: {ndf}"),
+            Line2D([], [], color="none", label=(
+                f"Deviancia/NDF: {result['deviance'] / ndf:.2f}"
+                if ndf > 0 else "Deviancia/NDF: –")),
+        ]
+        legend = ax.legend(
+            handles=[
+                Line2D([], [], marker="o", linestyle="none", color="black",
+                       markersize=6, label="Mért adatok"),
+                Line2D([], [], color="red", linewidth=2.6,
+                       label="Poisson-illesztés"),
+                *diagnostic,
+            ],
+            title=rf"$\lg(E/\mathrm{{eV}}) = {result['lgE']}$",
+            loc="upper right", bbox_to_anchor=(0.985, 0.985),
+            frameon=True, fancybox=False, framealpha=0.94,
+            facecolor="white", edgecolor="0.78",
+            fontsize=11.7, title_fontsize=15, handlelength=2.0,
+            handletextpad=0.7, borderpad=0.65, labelspacing=0.5,
         )
-
-        ax.text(0.03, 0.55, moment_text, transform=ax.transAxes, fontsize=9)
-        ax.set_title(f"lgE = {result['lgE']}")
+        legend.get_title().set_fontweight("semibold")
         ax.set_xlabel(r"$X_{\max}$ [g/cm$^2$]")
-        ax.legend(loc="upper right")
+        ax.set_xlim(common_xmin, common_xmax)
 
-    axes[0].set_ylabel("Probability per Xmax bin")
-
-    fig.suptitle(
-        "Raw-count Poisson composition fit\n"
-        f"resolution sigma = {RESOLUTION_SIGMA:.0f} g/cm², "
-        "Xmax = 504 excluded",
-        fontsize=14
-    )
+    axes[0].set_ylabel(r"Valószínűség $X_{\max}$-intervallumonként")
 
     fig.tight_layout()
+    fig.subplots_adjust(wspace=0)
     fig.savefig(RESULTS_DIR / "composition_poisson_fit.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
-    # =========================================================================
-    # PLOT 2 - DEVIANCE RESIDUALS
-    # =========================================================================
-
-    fig_res, axes_res = plt.subplots(1, 3, figsize=(18, 5), sharey=True)
+    # PLOT 2 - POISSON-DEVIANCIA ELTÉRÉSEI
+    fig_res, axes_res = plt.subplots(1, 3, figsize=(18, 5), sharex=True, sharey=True)
+    fig_res.patch.set_facecolor("white")
 
     for index, result in enumerate(nominal_results):
-
         ax = axes_res[index]
         x = result["x"]
         residuals = result["residuals"]
 
-        ax.axhline(0.0, linewidth=1)
-        ax.axhline(2.0, linestyle="--", linewidth=1)
-        ax.axhline(-2.0, linestyle="--", linewidth=1)
-        ax.scatter(x, residuals, s=20)
-        ax.set_title(f"lgE = {result['lgE']}")
+        ax.axhline(0.0, color="red", linewidth=1.5)
+        ax.axhline(2.0, color="gray", linestyle="--", linewidth=1)
+        ax.axhline(-2.0, color="gray", linestyle="--", linewidth=1)
+        ax.scatter(x, residuals, s=25, color="black")
+        ndf = len(result["counts"]) - 3
+        diagnostic = [
+            Line2D([], [], color="none", label=f"Deviancia: {result['deviance']:.1f}"),
+            Line2D([], [], color="none", label=f"NDF: {ndf}"),
+            Line2D([], [], color="none", label=(
+                f"Deviancia/NDF: {result['deviance'] / ndf:.2f}"
+                if ndf > 0 else "Deviancia/NDF: –")),
+        ]
+        legend = ax.legend(
+            handles=[
+                Line2D([], [], marker="o", linestyle="none", color="black",
+                       markersize=6, label="Eltérések"),
+                Line2D([], [], color="red", linewidth=1.8,
+                       label="Nullszint"),
+                *diagnostic,
+            ],
+            title=rf"$\lg(E/\mathrm{{eV}}) = {result['lgE']}$",
+            loc="upper right", bbox_to_anchor=(0.985, 0.985),
+            frameon=True, fancybox=False, framealpha=0.94,
+            facecolor="white", edgecolor="0.78",
+            fontsize=11.7, title_fontsize=15, handlelength=2.0,
+            handletextpad=0.7, borderpad=0.65, labelspacing=0.5,
+        )
+        legend.get_title().set_fontweight("semibold")
         ax.set_xlabel(r"$X_{\max}$ [g/cm$^2$]")
+        ax.set_xlim(common_xmin, common_xmax)
         ax.grid(alpha=0.25)
 
-    axes_res[0].set_ylabel("Signed Poisson deviance residual")
-    fig_res.suptitle("Poisson deviance residuals")
+    axes_res[0].set_ylabel("Előjeles Poisson-deviancia-eltérés")
+    # Az eltérések skálája mindhárom panelen közös; a valószínűségi ábráéval
+    # nem azonosítható, mert más fizikai mennyiséget és előjelet ábrázol.
     fig_res.tight_layout()
+    fig_res.subplots_adjust(wspace=0)
     fig_res.savefig(RESULTS_DIR / "composition_poisson_residuals.png", dpi=300, bbox_inches="tight")
     plt.close(fig_res)
 
-    # =========================================================================
     # FINISHED
-    # =========================================================================
-
     print()
     print("=" * 80)
     print("Analysis finished successfully.")
@@ -738,9 +589,6 @@ def main():
     print("  composition_poisson_fit.png")
     print("  composition_poisson_residuals.png")
 
-# ============================================================================
 # RUN
-# ============================================================================
-
 if __name__ == "__main__":
     main()

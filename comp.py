@@ -35,27 +35,31 @@ elements = [
 for title, auger, p_val, p_err, mc_val, ax in elements:
     #Auger
     ax.plot(lgE, auger, 'o', color='blue', label='Auger (eredeti)', markersize=7)
+    '''
     for x, y in zip(lgE, auger):
         ax.annotate(f'{y:.2f}', (x, y), textcoords="offset points", xytext=(-16, 6), fontsize=8, color='blue', fontweight='bold')
-        
+    '''
     #Possion
     ax.errorbar(lgE, p_val, yerr=p_err, fmt='^', color='red', label='Poisson MC', capsize=4, markersize=7)
+    '''
     for x, y in zip(lgE, p_val):
         ax.annotate(f'{y:.2f}', (x, y), textcoords="offset points", xytext=(8, -4), fontsize=8, color='red', fontweight='bold')
-
+    '''
     #MC
+
     ax.plot(lgE, mc_val, 's', color='green', label='MC chi2', markersize=6)
+    '''
     for x, y in zip(lgE, mc_val):
         ax.annotate(f'{y:.2f}', (x, y), textcoords="offset points", xytext=(-16, -12), fontsize=8, color='green', fontweight='bold')
-
+    '''
     ax.set_ylabel(f'${title}$', fontsize=12)
     ax.set_ylim(-0.1, 1.1)
-    ax.set_yticks([0.0, 0.5, 1.0])
-    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    #ax.grid(True, linestyle='--', alpha=0.5)
 
-axes[0].legend(loc='upper right', ncol=3)
-axes[3].set_xlabel('$\lg(E / \mathrm{eV})$', fontsize=12)
-axes[3].set_xticks([18.0, 18.5, 19.0])
+axes[0].legend(loc='upper right', ncol=1)
+axes[3].set_xlabel('$lg(E / \mathrm{eV})$', fontsize=12)
+axes[3].set_xticks([18.0, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8, 18.9, 19.0])
 plt.tight_layout()
-plt.subplots_adjust(hspace=0.1)  
+plt.subplots_adjust(hspace=0.0)
 plt.show()
